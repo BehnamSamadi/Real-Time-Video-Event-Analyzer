@@ -58,7 +58,7 @@ class Stream(Task):
         return cap
 
     def _dump(self):
-        data = np.array(self.sample_buffer)
+        data = np.array(self.buffer)
         index = self.index
         data_dict = {'data': data,
             'index': index}
@@ -70,7 +70,7 @@ class Stream(Task):
 
     def _is_active(self):
         if time.time - self.last_active > self.active_delay:
-            std = np.std(sample_buffer, axis=0) / 255 / 2
+            std = np.std(self.buffer, axis=0) / 255 / 2
             norm_std = std.sum() / std.size()
             if norm_std > self.sensitivity:
                 return True
