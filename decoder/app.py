@@ -1,14 +1,12 @@
-from celery import Celery
+from celery_app import app
 from stream_manager import StreamManager
 from utils import fetch_streams
 import redis
 
 
-app = Celery()
-app.config_from_object('celery_config')
 streams = fetch_streams()
-queue = redis.Redis()
-stream_mgr = StreamManager(streams, queue)
+queue_name = 'queue:clips'
+stream_mgr = StreamManager(streams, queue_name)
 
 
 @app.task(name='decoder.add_stream')

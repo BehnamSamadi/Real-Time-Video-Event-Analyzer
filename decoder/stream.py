@@ -6,13 +6,16 @@ import numpy as np
 import cv2
 import time
 import pickle
+import redis
+from celery_app import app
 
 
 
 class Stream(Task):
-
+    name = 'Stream'
     CAPTURE_FLAG = True
     queue = None
+    queue_name = None
     index = None
     sample_duration = None
     buffer = []
@@ -25,11 +28,12 @@ class Stream(Task):
     last_active = -100
 
 
-    def run(self, index, stream_address, queue, sample_duration,
+    def run(self, index, stream_address, queue_name, sample_duration,
             sample_size, frame_size, active_delay=1, sensitivity=0.5):
         
         self.cap = self._create_stream(stream_address)
-        self.queue = queue
+        self.queue = redis.Redis()
+        self.queue_name = queue_name
         self.index = index
         self.sample_size = sample_size
         self.active_delay = active_delay
@@ -42,7 +46,7 @@ class Stream(Task):
 
 
     def _sample(self):
-        if cap.isOpened:
+        if self.cap.isOpened:
             ret, frame = self.cap.read()
             if ret:
                 if time.time() - self.last_capture >= self.sample_rate:
@@ -65,13 +69,18 @@ class Stream(Task):
         return pickle.dumps(data_dict)
 
     def _send_to_queue(self):
+        print('dumping')
         data = self._dump()
-        self.queue.rpush('queue:clips', data)
+        self.queue.rpush(self.queue_name, data)
 
     def _is_active(self):
-        if time.time - self.last_active > self.active_delay:
+        if len(self.buffer) < self.sample_size:
+            return False
+        if time.time() - self.last_active > self.active_delay:
             std = np.std(self.buffer, axis=0) / 255 / 2
-            norm_std = std.sum() / std.size()
+            norm_std = std.sum() / std.size
             if norm_std > self.sensitivity:
                 return True
         return False
+
+app.register_task(Stream())
