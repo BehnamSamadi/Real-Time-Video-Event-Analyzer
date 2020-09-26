@@ -11,7 +11,7 @@ import pickle
 
 class Stream(Task):
 
-    capture_flag = True
+    CAPTURE_FLAG = True
     queue = None
     index = None
     sample_duration = None
@@ -35,7 +35,7 @@ class Stream(Task):
         self.active_delay = active_delay
         self.sensitivity = sensitivity
         self.sample_rate = sample_duration / sample_size
-        while self.capture_flag:
+        while self.CAPTURE_FLAG:
             self._sample()
             if self._is_active():
                 self._send_to_queue()
