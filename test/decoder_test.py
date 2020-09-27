@@ -5,7 +5,7 @@ app = Celery('Decoder_test')
 
 stream_prop = {
     'id': '0',
-    'address': 'rtsp://192.168.43.78:8554/sed.mkv',
+    'address': 'rtsp://localhost:8554/sed.mkv',
     'sample_duration': 5,
     'sample_size': 11,
     'frame_size': (320, 240),

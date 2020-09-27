@@ -72,6 +72,7 @@ class Stream(Task):
         print('dumping')
         data = self._dump()
         self.queue.rpush(self.queue_name, data)
+        self.last_active = time.time()
 
     def _is_active(self):
         if len(self.buffer) < self.sample_size:
