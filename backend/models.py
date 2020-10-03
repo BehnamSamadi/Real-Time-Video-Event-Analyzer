@@ -16,7 +16,7 @@ class Log(db.Model):
     __tablename__ = 'log'
     stream_id = db.Column(db.Integer, db.ForeignKey('stream.id'))
     time = db.Column(db.DateTime)
-    event_type = db.Column(db.Integer, db.ForeignKey('event.id'))
+    # event_type = db.Column(db.Integer, db.ForeignKey('event.id'))
     confidence = db.Column(db.Float)
 
 class Event(db.Model):
