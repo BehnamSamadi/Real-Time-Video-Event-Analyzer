@@ -36,7 +36,8 @@ def add_stream():
 
 @app.route('/remove_stream', methods=['POST'])
 def remove_stream():
-    stream_id = utils.parse_stream_id(request)
+    req = request.json
+    stream_id = utils.parse_stream_id(req)
     if stream_id:
         removal = Stream.query.fillter_by(id=stream_id).first()
         if removal:
@@ -55,3 +56,4 @@ def remove_stream():
 def fetch_streams():
     res = Stream.query.all()
     return res
+

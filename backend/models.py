@@ -57,5 +57,4 @@ class VideoRecord(db.Model):
             'label': self.label
         }
         return res
-    
 
