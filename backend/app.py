@@ -57,3 +57,8 @@ def fetch_streams():
     res = Stream.query.all()
     return res
 
+
+@app.route('/update_ml', methods=['GET'])
+def update_ml():
+    return
+
