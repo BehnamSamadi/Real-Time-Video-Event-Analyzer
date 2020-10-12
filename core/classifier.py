@@ -6,7 +6,7 @@ from faiss
 
 
 class Classifier(object):
-    def __init__(self, vector_db_path=None):
+    def __init__(self, vector_db_path=None, min_distance=0.6):
         self.feature_extractor = FeatureExtractor()
         self.index = self._init_vector_db(vector_db_path)
 
@@ -32,7 +32,12 @@ class Classifier(object):
         return index
 
     def __call__(self, input):
-        pass
+        features = self.feature_extractor(input)
+        distances, ids = self.index.search(features, 1)
+        for distance, id in zip(distances, ids):
+            if distance[0] <= min_distance:
+                return 1
+            return 0
 
     def _save_index(self, vector_db_path):
         assert self.index, 'Index not created'
