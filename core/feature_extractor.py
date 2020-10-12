@@ -2,7 +2,7 @@ import numpy as np
 
 
 
-class Feature_Extractor:
+class FeatureExtractor:
     def __init__(self):
         """Some model initializations here"""
         self.feature_size = 256
