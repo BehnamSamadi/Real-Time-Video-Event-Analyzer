@@ -8,9 +8,9 @@ class FeatureExtractor:
         self.feature_size = 256
 
 
-    def __call__(self, frames):
+    def __call__(self, clips):
         """Feature Extractions here"""
-        features = np.random.random((1, self.feature_size))
+        features = np.random.random((len(clips), self.feature_size))
         features = np.sqrt(np.sum(features ** 2, -1, keepdims=True))
         return features
 

@@ -2,13 +2,15 @@
 This module gets decoded streams and classifies them and sends results to result_manager
 """
 from feature_extractor import FeatureExtractor
-from faiss
+import faiss
+import numpy as np
 
 
 class Classifier(object):
     def __init__(self, vector_db_path=None, min_distance=0.6):
         self.feature_extractor = FeatureExtractor()
         self.index = self._init_vector_db(vector_db_path)
+        self.min_distance = min_distance
 
     def _load_vector_db(self, vector_db_path):
         if vector_db_path:
@@ -20,7 +22,7 @@ class Classifier(object):
         return self._init_vector_db(vector_db_path)
 
     def _init_vector_db(self, vector_db_path):
-        dimention = 2048
+        dimention = 256
         quantizer = faiss.IndexFlatL2(dimention)
         index = faiss.IndexIVFFlat(
             quantizer, dimention, 100, faiss.METRIC_L2
@@ -31,14 +33,21 @@ class Classifier(object):
         self._save_index(vector_db_path)
         return index
 
-    def __call__(self, input):
+    def predict(self, input):
         features = self.feature_extractor(input)
         distances, ids = self.index.search(features, 1)
+        results = []
         for distance, id in zip(distances, ids):
-            if distance[0] <= min_distance:
-                return 1
-            return 0
+            res = self.min_distance / (distance+1e-7) / 2
+            conf = min(res, 1)
+            results.append(conf)
+        return results
 
     def _save_index(self, vector_db_path):
         assert self.index, 'Index not created'
         faiss.write_index(self.index, vector_db_path)
+
+    def add_new_data(self, data, ids):
+        assert len(data) == len(ids)
+        features = self.feature_extractor(data)
+        self.index.add_with_ids(features, ids)
