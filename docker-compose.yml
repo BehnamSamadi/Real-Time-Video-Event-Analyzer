@@ -1,5 +1,6 @@
 version: "3.4"
 services: 
+
     database: 
         image: bitnami/postgresql:latest
         environment: 
@@ -10,6 +11,12 @@ services:
     redis:
         image: redis:5
     
+    decoder:
+        image:
+            context: "./decoder"
+        environment:
+            CELERY_BROKER: redis:6379/1
+
     core:
         image:
             context: "./core"

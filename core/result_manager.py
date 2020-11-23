@@ -29,3 +29,6 @@ class ResultManager(object):
 
     def send_status(self, index, conf):
         pass
+    
+    def update(self, dataset_path):
+        pass
