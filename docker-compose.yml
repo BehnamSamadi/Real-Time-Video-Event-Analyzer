@@ -4,7 +4,7 @@ services:
     database: 
         image: bitnami/postgresql:latest
         environment: 
-            password: sag
+            password: p@$$w0rd
         volumes: 
             - "/home/behnam/db/:/var/lib/postgres"
     
