@@ -4,12 +4,14 @@ This module Manages Results and saves them into DB
 from classifier import Classifier
 import redis
 import pickle
+import datetime
 
 
 class ResultManager(object):
-    def __init__(self, vector_db_path, in_queue_name, classifier_min_distance=0.6):
+    def __init__(self, vector_db_path, in_queue_name, out_queue_name, classifier_min_distance=0.6):
         self.queue = redis.Redis()
         self.in_queue_name = in_queue_name
+        self.out_queue_name = out_queue_name
         self.clf = Classifier(vector_db_path, classifier_min_distance)
         self.PIPELINE_FLAG = True
     
@@ -28,7 +30,15 @@ class ResultManager(object):
         return pickle.loads(data[1])
 
     def send_status(self, index, conf):
-        pass
+        now = str(datetime.datetime.now())
+        res = {
+            'datetime': now, 
+            'cam_index': index,
+            'confidence': conf
+        }
+        self.queue.rpush(self.out_queue_name, res)
+        
     
     def update(self, dataset_path):
-        pass
+        
+        

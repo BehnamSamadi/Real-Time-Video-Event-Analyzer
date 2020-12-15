@@ -9,7 +9,7 @@ import numpy as np
 class Classifier(object):
     def __init__(self, vector_db_path=None, min_distance=0.6):
         self.feature_extractor = FeatureExtractor()
-        self.index = self._init_vector_db(vector_db_path)
+        self.index = self._load_vector_db(vector_db_path)
         self.min_distance = min_distance
 
     def _load_vector_db(self, vector_db_path):
@@ -19,6 +19,7 @@ class Classifier(object):
                 return index
             except:
                 print('Vector DB Read Error')
+        vector_db_path = 'index_db.index'
         return self._init_vector_db(vector_db_path)
 
     def _init_vector_db(self, vector_db_path):
@@ -51,3 +52,8 @@ class Classifier(object):
         assert len(data) == len(ids)
         features = self.feature_extractor(data)
         self.index.add_with_ids(features, ids)
+    
+    def clear_db(self):
+        vector_db_path = 'index_db.index'
+        self.index = self._init_vector_db(vector_db_path)
+
