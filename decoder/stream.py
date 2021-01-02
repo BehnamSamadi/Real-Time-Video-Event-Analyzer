@@ -7,6 +7,7 @@ import cv2
 import time
 import pickle
 import redis
+import datetime
 from celery_app import app
 
 
@@ -65,7 +66,9 @@ class Stream(Task):
         data = np.array(self.buffer)
         index = self.index
         data_dict = {'data': data,
-            'index': index}
+            'index': index,
+            'datetime': datetime.datetime.now()
+            }
         return pickle.dumps(data_dict)
 
     def _send_to_queue(self):
@@ -83,5 +86,8 @@ class Stream(Task):
             if norm_std > self.sensitivity:
                 return True
         return False
+    
+    def deactivate(self):
+        self.CAPTURE_FLAG = False
 
 app.register_task(Stream())

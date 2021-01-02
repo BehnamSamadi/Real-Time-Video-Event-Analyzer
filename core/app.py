@@ -1,32 +1,29 @@
 """
 This script runs a pipeline for classification and training
 """
-import celery
+from celery_app import app
 from result_manager import ResultManager
 import os
 
 
-broker = os.getenv('SP_BROKER_URL', 'amqp://localhost:5672/')
 vector_db_path = os.getenv('VECTOR_DB_PATH')
-queue_name = os.getenv('INPUT_DATA_QUEUE_NAME', 'queue:data')
+queue_name = os.getenv('INPUT_DATA_QUEUE_NAME', 'queue:clips')
 min_distance = float(os.getenv('MIN_KNN_DISTANCE', 0.6))
-video_db = os.getenv('DATASET_PATH', './dataset')
+video_dataset_path = os.getenv('DATASET_PATH', './dataset')
 
+res_man = ResultManager(app, vector_db_path, queue_name, min_distance)
 
-app = celery.Celery()
-res_man = ResultManager(vector_db_path, queue_name, min_distance)
-
-@app.task
+@app.task(name='core.run_pipeline')
 def run_pipeline():
     res_man.run()
 
 
-@app.task(name='update_ml')
+@app.task(name='core.update_ml')
 def update_ml():
-    res_man.update(video_db)
+    res_man.update(video_dataset_path)
+    return True
 
 pipe = run_pipeline.delay()
-
 
 
 

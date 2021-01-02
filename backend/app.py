@@ -12,6 +12,12 @@ celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 celery.conf.update(app.config)
 
 
+
+@celery.task(name='backend.update_stream_status')
+def update_stream_status(stream_status):
+    print(stream_status)
+
+
 @app.route('/add_stream', methods=['POST'])
 def add_stream():
     stream_props = utils.parse_stream_prop(request)
@@ -24,7 +30,7 @@ def add_stream():
                             sensitivity=stream_props['sensitivity']
                         )
         
-        celery.send_task('decoder.add_stream', stream_props)
+        celery.send_task('decoder.add_stream', (stream_props,))
         db.session.add(db_stream)
         dv.session.commit()
         return {
@@ -43,7 +49,7 @@ def remove_stream():
         if removal:
             db.session.delete(removal)
             db.session.commit()
-            celery.send_task('decoder.remove_stream', stream_id)
+            celery.send_task('decoder.remove_stream', (stream_id,))
             return {
                 'status': 'success'
             }

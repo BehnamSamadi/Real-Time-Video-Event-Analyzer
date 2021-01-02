@@ -13,17 +13,18 @@ class StreamManager(object):
 
     def add_new_stream(self, stream_prop):
         self.remove_stream(stream_prop['id'])
-        dcr = Stream()
-        dcr.delay(stream_prop['id'], stream_prop['address'],
+        task_args = (stream_prop['id'], stream_prop['address'],
                         self.queue_name, stream_prop['sample_duration'],
                         stream_prop['sample_size'], stream_prop['frame_size'],
                         stream_prop['active_delay'], stream_prop['sensitivity'])
+        dcr = Stream()
+        dcr.apply_async(task_args, queue='decoder')
         self.decoders[stream_prop['id']] = dcr
 
     def remove_stream(self, stream_id):
         if stream_id in self.decoders.keys():
             dcr = self.decoders[stream_id]
-            dcr.CAPTURE_FLAG = False
+            dcr.deactivate()
             self.decoders.pop(stream_id, None)
             return True
         return False
