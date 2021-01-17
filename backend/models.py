@@ -26,6 +26,7 @@ class Stream(db.Model):
 
 class Log(db.Model):
     __tablename__ = 'log'
+    id = db.Column(db.Integer, primary_key=True)
     stream_id = db.Column(db.Integer, db.ForeignKey('stream.id'))
     time = db.Column(db.DateTime)
     # event_type = db.Column(db.Integer, db.ForeignKey('event.id'))
@@ -57,4 +58,3 @@ class VideoRecord(db.Model):
             'label': self.label
         }
         return res
-

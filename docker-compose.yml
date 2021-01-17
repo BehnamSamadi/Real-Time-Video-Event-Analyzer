@@ -3,8 +3,10 @@ services:
 
     database: 
         image: bitnami/postgresql:latest
-        environment: 
-            password: p@$$w0rd
+        environment:
+            POSTGRESQL_USERNAME: username
+            POSTGRESQL_PASSWORD: p@ssw0rd
+            POSTGRESQL_DATABASE: anomaly
         volumes: 
             - "/home/behnam/db/:/var/lib/postgres"
     
@@ -16,12 +18,17 @@ services:
             context: "./decoder"
         environment:
             CELERY_BROKER: redis:6379/1
+            REDIS_QUEUE_CORE_DB : 0
+            REDIS_QUEUE_DB: 1
+            REDIS_QUEUE_HOST: redis
 
     core:
         image:
             context: "./core"
         environment:
             CELERY_BROKER: redis:6379/1
+        volumes: 
+            - "/home/prophet/dataset:/dataset"
 
     backend:
         image:
@@ -30,4 +37,4 @@ services:
             - 8000:8000
         environment:
             CELERY_BROKER: redis:6379/1
-            DATABASE_URI: "database"
+            DATABASE_URI: "postgresql:///username:p@ssword@database:5432/anomaly"

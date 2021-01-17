@@ -8,6 +8,7 @@ app.conf.task_routes = {
     'decoder.*': {'queue': 'decoder'},
 }
 
+app.config_from_object('celery_config')
 
 stream_prop = {
     'id': '0',
@@ -21,5 +22,5 @@ stream_prop = {
 
 
 app.send_task('decoder.add_stream', (stream_prop,))
-time.sleep(5)
-app.send_task('decoder.remove_stream', ('0',))
+# time.sleep(6)
+# app.send_task('decoder.remove_stream', ('0',))

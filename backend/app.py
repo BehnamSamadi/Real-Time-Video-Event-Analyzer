@@ -1,21 +1,32 @@
 from flask import Flask, request, jsonify
+from flask_socketio import SocketIO, join_room, rooms
 from models import db, Event, Log, Stream, VideoRecord
-from celery import Celery
 import os
 import utils
+import datetime
+from celery_app import celery_app
 
 
 app = Flask("backend_app")
 app.config['CELERY_BROKER'] = os.getenv('CELERY_BROKER')
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('DATABASE_URI', "sqlite:///db.sqlite")
 db.init_app(app)
-celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
-celery.conf.update(app.config)
+db.create_all()
+socket = SocketIO(app, cors_allowed_origins='*')
+ml_status = None
 
 
-
-@celery.task(name='backend.update_stream_status')
-def update_stream_status(stream_status):
-    print(stream_status)
+@app.route('/update_status', methods=['POST'])
+def update_status():
+    stream_status = request.json
+    stream_id = stream_status['stream_id']
+    time = stream_status['datetime']
+    time = datetime.datetime.strptime(time, "%Y-%m-%dT%H:%M:%S.%f")
+    confidence = stream_status['confidence']
+    socket.emit('log', stream_status, broadcast=True)
+    log = Log(stream_id=stream_id, time=time, confidence=confidence)
+    db.session.add(log)
+    db.session.commit()
 
 
 @app.route('/add_stream', methods=['POST'])
@@ -32,13 +43,14 @@ def add_stream():
         
         celery.send_task('decoder.add_stream', (stream_props,))
         db.session.add(db_stream)
-        dv.session.commit()
+        db.session.commit()
         return {
             'status': 'success'
         }
     return {
         'status': 'failed'
         }
+
 
 @app.route('/remove_stream', methods=['POST'])
 def remove_stream():
@@ -49,7 +61,7 @@ def remove_stream():
         if removal:
             db.session.delete(removal)
             db.session.commit()
-            celery.send_task('decoder.remove_stream', (stream_id,))
+            celery_app.send_task('decoder.remove_stream', (stream_id,))
             return {
                 'status': 'success'
             }
@@ -61,10 +73,27 @@ def remove_stream():
 @app.route('/fetch_streams', methods=['GET'])
 def fetch_streams():
     res = Stream.query.all()
-    return res
-
+    res_json = [r.get_json() for r in res]
+    return jsonify(res_json)
 
 @app.route('/update_ml', methods=['GET'])
 def update_ml():
-    return
+    global ml_status
+    if ml_status and ml_status.status in ['PENDING', 'STARTED']:
+        stat = {'status': 'RUNNING'}
+        return jsonify(stat)
+    ml_status = celery_app.send_task('core.update_ml')
+    stat = {
+        'task_id': ml_status.task_id,
+        'status': 'STARTED'
+    }
+    return jsonify(stat)
 
+@app.route('/get_ml_status/<task_id>')
+def get_ml_status(task_id):
+    res = celery_app.AsyncResult(task_id)
+    return jsonify(res.status())
+
+
+if __name__ == "__main__":
+    socket.run(app, '0.0.0.0', port=5000)

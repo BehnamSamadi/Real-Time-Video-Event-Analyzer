@@ -36,7 +36,7 @@ class ResultManager(object):
     def send_status(self, index, datetime, conf):
         res = {
             'datetime': datetime,
-            'cam_index': index,
+            'stream_id': index,
             'confidence': conf
         }
         print(res)

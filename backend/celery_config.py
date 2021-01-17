@@ -1,6 +1,7 @@
 import os
 
-name= 'Core'
+name= 'Backend'
+# broker = 'amqp://localhost'
 broker = os.getenv('CELERY_BROKER', 'amqp://localhost')
 # broker = os.getenv('SP_BROKER_URL', 'amqp://localhost')
 # result_backend = 'redis://localhost:6379/0'
