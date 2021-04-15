@@ -1,2 +1,2 @@
 # Real-Time-Video-Event-Analyzer
-A Real-Time platform for Analyzing Video Events based on Video Similarity
+A platform for Real-Time Analysis of Video Events based on Video Similarity
