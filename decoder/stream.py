@@ -27,8 +27,8 @@ class Stream(Task):
     index = None
     sample_duration = None
     buffer = []
-    sample_size = 10
-    frame_size = (320, 240)
+    sample_size = 32
+    frame_size = (256, 256)
     active_delay = 1
     last_capture = -1
     sensitivity = 0
@@ -44,6 +44,7 @@ class Stream(Task):
         self.queue_name = queue_name
         self.index = index
         self.sample_size = sample_size
+        self.frame_size = frame_size
         self.active_delay = active_delay
         self.sensitivity = sensitivity
         self.sample_rate = sample_duration / sample_size

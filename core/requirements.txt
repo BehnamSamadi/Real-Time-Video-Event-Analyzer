@@ -1,0 +1,5 @@
+torch==1.6.0
+torchvision==0.7.0
+gluoncv==0.11.0b20211010
+celery==4.4.1
+pyyaml

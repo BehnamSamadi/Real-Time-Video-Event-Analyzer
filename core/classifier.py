@@ -9,7 +9,7 @@ import time
 
 class Classifier(object):
     def __init__(self, vector_db_path='index_db.index', min_distance=0.6):
-        self.feature_extractor = FeatureExtractor()
+        self.feature_extractor = FeatureExtractor('i3d_resnet50_v1_feat.yaml')
         self.vector_db_path = vector_db_path
         self.index = self._load_vector_db()
         self.min_distance = min_distance
@@ -68,6 +68,7 @@ class Classifier(object):
         assert len(data) == len(ids)
         features = self.feature_extractor(data)
         self.index.add_with_ids(features, ids)
+        self._save_index(self.index, self.vector_db_path)
     
     def clear_db(self):
         self.index = self._init_vector_db()
