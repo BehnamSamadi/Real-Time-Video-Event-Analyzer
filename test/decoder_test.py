@@ -12,10 +12,10 @@ app.config_from_object('celery_config')
 
 stream_prop = {
     'id': '0',
-    'address': 'rtsp://localhost:8554/sed.mkv',
-    'sample_duration': 5,
-    'sample_size': 8,
-    'frame_size': (320, 240),
+    'address': 'rtsp://localhost:8554/sample.265',
+    'sample_duration': 10,
+    'sample_size': 32,
+    'frame_size': (256, 256),
     'active_delay': 2,
     'sensitivity': 0.0
 }

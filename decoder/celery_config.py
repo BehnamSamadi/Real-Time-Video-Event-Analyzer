@@ -1,3 +1,5 @@
+import os 
+
 name= 'Decoder'
 broker = os.getenv('CELERY_BROKER', 'amqp://localhost')
 # broker = os.getenv('SP_BROKER_URL', 'amqp://localhost')

@@ -27,7 +27,7 @@ class Classifier(object):
 
     def _init_vector_db(self):
         self._training = True
-        dimention = 256
+        dimention = 2048
         quantizer = faiss.IndexFlatL2(dimention)
         index = faiss.IndexIVFFlat(
             quantizer, dimention, 100, faiss.METRIC_L2
@@ -40,7 +40,7 @@ class Classifier(object):
         return index
 
     def predict(self, input):
-        features = self.feature_extractor(input)
+        features = self.feature_extractor.predict(input)
         while self._training:
             time.sleep(0.5)
         distances, ids = self.index.search(features, 1)

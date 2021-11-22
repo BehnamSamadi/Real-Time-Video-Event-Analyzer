@@ -27,7 +27,7 @@ class ResultManager(object):
                 datetime = data['datetime']
                 while self.clf.is_training():
                     time.sleep(1)
-                conf = self.clf.predict([clip])
+                conf = self.clf.predict(clip)
                 self.send_status(index, datetime, conf)
     
     def deserialize_data(self, data):
@@ -43,7 +43,7 @@ class ResultManager(object):
         self.app.send_task('backend.update_stream_status', (res,))
     
     def update(self, dataset_path):
-        loader = VideoLoader(dataset_path, 8)
+        loader = VideoLoader(dataset_path, 32)
         self.clf.clear_db()
         for i in range(len(loader)):
             video = loader[i]
