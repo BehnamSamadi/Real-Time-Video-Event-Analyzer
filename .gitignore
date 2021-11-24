@@ -3,3 +3,6 @@
 *.pth
 *.index
 *.sqlite
+*.mp4
+*.265
+*.mkv

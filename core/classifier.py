@@ -62,7 +62,7 @@ class Classifier(object):
 
     def add_new_data(self, data, ids):
         if ids == -1:
-            features = self.feature_extractor(data)
+            features = self.feature_extractor.predict(data)
             self.index.add(features)
             return
         assert len(data) == len(ids)
