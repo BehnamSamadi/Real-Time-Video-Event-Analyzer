@@ -4,14 +4,16 @@ from models import db, Event, Log, Stream, VideoRecord
 import os
 import utils
 import datetime
+from dateutil import parser
 from celery_app import celery_app
 
 
+SQLALCHEMY_TRACK_MODIFICATIONS = False
 app = Flask("backend_app")
 app.config['CELERY_BROKER'] = os.getenv('CELERY_BROKER')
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('DATABASE_URI', "sqlite:///db.sqlite")
-db.init_app(app)
-db.create_all()
+sag = db.init_app(app)
+db.create_all(app=app)
 socket = SocketIO(app, cors_allowed_origins='*')
 ml_status = None
 
@@ -19,14 +21,16 @@ ml_status = None
 @app.route('/update_status', methods=['POST'])
 def update_status():
     stream_status = request.json
-    stream_id = stream_status['stream_id']
+    stream_id = int(stream_status['stream_id'])
     time = stream_status['datetime']
-    time = datetime.datetime.strptime(time, "%Y-%m-%dT%H:%M:%S.%f")
+    time = parser.parse(time)
     confidence = stream_status['confidence']
     socket.emit('log', stream_status, broadcast=True)
     log = Log(stream_id=stream_id, time=time, confidence=confidence)
     db.session.add(log)
     db.session.commit()
+    print('new status update', log)
+    return 'success'
 
 
 @app.route('/add_stream', methods=['POST'])

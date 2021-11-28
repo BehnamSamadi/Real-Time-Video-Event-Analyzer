@@ -18,6 +18,9 @@ class ModelTrainer(object):
     def train(self, dataset_path):
         # self.status_db.set('is_training', 1)
         self.clf._training = True
+        while self.clf.is_in_use():
+            print('waiting for inference...')
+            time.sleep(0.1)
         loader = VideoLoader(dataset_path, 32)
         self.clf.clear_db()
         for i in range(len(loader)):

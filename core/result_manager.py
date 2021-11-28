@@ -1,13 +1,15 @@
 """
 This module Manages Results and saves them into DB
 """
-from classifier import Classifier
 import redis
 import pickle
-import datetime
 import time
 import os
-from dataloader import VideoLoader
+import requests
+import json
+
+
+BACKEND_ADDRESS = os.getenv('BACKEND_SEND_STATUS_URL', 'http://localhost:5000/update_status')
 
 
 class ResultManager(object):
@@ -22,29 +24,30 @@ class ResultManager(object):
     
     def run(self):
         while self.PIPELINE_FLAG:
-            # train_status = int(self.status_db.get('is_training'))
-            train_status = self.clf.is_training()
-            if not train_status:
-                packed_data = self.queue.blpop([self.in_queue_name], 0)
-                if packed_data is not None:
-                    data = self.deserialize_data(packed_data)
-                    index = data['index']
-                    clip = data['data']
-                    datetime = data['datetime']
-                    while self.clf.is_training():
-                        time.sleep(1)
-                    conf = self.clf.predict(clip)
-                    self.send_status(index, datetime, conf)
+            packed_data = self.queue.blpop([self.in_queue_name], 0)
+            if packed_data is not None:
+                data = self.deserialize_data(packed_data)
+                index = data['index']
+                clip = data['data']
+                datetime = data['datetime']
+                while self.clf.is_training():
+                    print('waiting for train...')
+                    time.sleep(1)
+                self.clf._in_use = True
+                conf = self.clf.predict(clip)
+                self.send_status(index, datetime, conf[0])
+                self.clf._in_use = False
     
     def deserialize_data(self, data):
         return pickle.loads(data[1])
 
     def send_status(self, index, datetime, conf):
-        res = {
-            'datetime': datetime,
+        print(type(datetime))
+        stream_status = {
+            'datetime': str(datetime),
             'stream_id': index,
             'confidence': conf
         }
-        print(res)
-        self.app.send_task('backend.update_stream_status', (res,))
-
+        # stream_status = json.dumps(stream_status, indent=4, sort_keys=True)
+        print(stream_status)
+        requests.post(BACKEND_ADDRESS, json=stream_status)

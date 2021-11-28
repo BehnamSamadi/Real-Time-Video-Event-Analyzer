@@ -39,6 +39,9 @@ class Log(db.Model):
             'confidence': self.confidence
         }
         return res
+    
+    def __str__(self) -> str:
+        return "id: {} stream-id:{} time:{} confidence:{:.3f}".format(self.id, self.stream_id, self.time, self.confidence)
 
 class Event(db.Model):
     __tablename__ = 'event'

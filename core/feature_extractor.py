@@ -25,7 +25,7 @@ class FeatureExtractor(object):
     def predict(self, clip):
         clip = self.__do_transforms(clip)
         features = self.model(clip).detach().numpy()
-        print(features.shape)
+        features = features / np.sqrt(np.sum(features ** 2, -1, keepdims=True))
         return features
 
     def __do_transforms(self, frames):
