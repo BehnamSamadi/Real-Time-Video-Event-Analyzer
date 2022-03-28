@@ -30,20 +30,22 @@ class ResultManager(object):
                 index = data['index']
                 clip = data['data']
                 datetime = data['datetime']
+                clip_id = data['id']
                 while self.clf.is_training():
                     print('waiting for train...')
                     time.sleep(1)
                 self.clf._in_use = True
                 conf = self.clf.predict(clip)
-                self.send_status(index, datetime, conf[0])
+                self.send_status(index, clip_id, datetime, conf[0])
                 self.clf._in_use = False
     
     def deserialize_data(self, data):
         return pickle.loads(data[1])
 
-    def send_status(self, index, datetime, conf):
+    def send_status(self, index, clip_id, datetime, conf):
         print(type(datetime))
         stream_status = {
+            'clip_id': clip_id,
             'datetime': str(datetime),
             'stream_id': index,
             'confidence': conf

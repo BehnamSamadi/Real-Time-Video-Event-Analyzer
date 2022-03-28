@@ -29,13 +29,7 @@ class Classifier(object):
     def _init_vector_db(self):
         self._training = True
         dimention = 2048
-        quantizer = faiss.IndexFlatL2(dimention)
-        index = faiss.IndexIVFFlat(
-            quantizer, dimention, 100, faiss.METRIC_L2
-        )
-        x_train = np.random.random((10000, dimention)).astype('float32')
-        x_train = x_train / np.sqrt(np.sum(x_train ** 2, -1, keepdims=True))
-        index.train(x_train)
+        index = faiss.IndexFlatL2(dimention)
         self._save_index(index, self.vector_db_path)
         self._training = False
         return index
@@ -64,14 +58,14 @@ class Classifier(object):
         assert index, 'Index not created'
         faiss.write_index(index, vector_db_path)
 
-    def add_new_data(self, data, ids):
+    def add_new_data(self, data, ids=-1):
         if ids == -1:
             features = self.feature_extractor.predict(data)
             self.index.add(features)
-            return
-        assert len(data) == len(ids)
-        features = self.feature_extractor(data)
-        self.index.add_with_ids(features, ids)
+            # return
+        # assert len(data) == len(ids)
+        # features = self.feature_extractor(data)
+        # self.index.add_with_ids(features, ids)
         self._save_index(self.index, self.vector_db_path)
     
     def clear_db(self):

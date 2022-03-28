@@ -18,7 +18,7 @@ def add_stream(stream_prop):
 @app.task(name='decoder.remove_stream')
 def remove_stream(stream_id):
     res = stream_mgr.remove_stream(stream_id)
-    # print('stream {} {} removed'.format(stream_id, res))
+    print('stream {} {} removed'.format(stream_id, res))
     return res
 
 

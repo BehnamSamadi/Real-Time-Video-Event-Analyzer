@@ -10,7 +10,7 @@ import os
 
 vector_db_path = os.getenv('VECTOR_DB_PATH')
 queue_name = os.getenv('INPUT_DATA_QUEUE_NAME', 'queue:clips')
-classifier_min_distance = float(os.getenv('MIN_KNN_DISTANCE', 0.6))
+classifier_min_distance = float(os.getenv('MIN_KNN_DISTANCE', 0.3))
 video_dataset_path = os.getenv('DATASET_PATH', './dataset')
 
 clf = Classifier(vector_db_path, min_distance=classifier_min_distance)

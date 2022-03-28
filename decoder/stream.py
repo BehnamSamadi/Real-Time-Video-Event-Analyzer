@@ -12,6 +12,7 @@ import datetime
 from celery_app import app
 from billiard.exceptions import Terminated
 import threading
+from uuid import uuid4
 
 
 class Stream(Task):
@@ -34,6 +35,8 @@ class Stream(Task):
     sensitivity = 0
     sample_rate = 0
     last_active = -100
+    fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+    save_dir = './saved_clips/videos/saved_clips/'
 
 
     def run(self, index, stream_address, queue_name, sample_duration,
@@ -75,10 +78,13 @@ class Stream(Task):
     def _dump(self):
         data = np.array(self.buffer)
         index = self.index
+        clip_id = str(uuid4())
         data_dict = {'data': data,
             'index': index,
-            'datetime': datetime.datetime.now()
+            'datetime': datetime.datetime.now(),
+            'id': clip_id
             }
+        self.write_buffer(clip_id)
         return pickle.dumps(data_dict)
 
     def _send_to_queue(self):
@@ -96,5 +102,13 @@ class Stream(Task):
             if norm_std > self.sensitivity:
                 return True
         return False
+
+    def write_buffer(self, clip_id):
+        video_path = self.save_dir + clip_id + '.mp4'
+        video_writer = cv2.VideoWriter(video_path, self.fourcc, 1/self.sample_rate, self.frame_size)
+        for frame in self.buffer:
+            video_writer.write(frame[...,::-1])
+        video_writer.release()
+    
 
 app.register_task(Stream())
