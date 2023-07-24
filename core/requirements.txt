@@ -1,4 +1,4 @@
-torch==1.6.0
+torch==1.13.1
 torchvision==0.7.0
 gluoncv==0.11.0b20211010
 celery==4.4.1
